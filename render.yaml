@@ -1,0 +1,94 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# Deploy: Render Dashboard -> New -> Blueprint -> pick this repo.
+# Everything below is created automatically except the values marked
+# `sync: false`, which Render prompts you for (they are secrets, so they
+# deliberately do not live in this file).
+#
+# The database is NOT defined here on purpose: keep it on Neon or TiDB Cloud
+# so the data outlives any single Render service. See README -> Choosing a database.
+
+services:
+  - type: web
+    name: workpulse
+    runtime: node
+    plan: free
+    region: singapore # closest to IST users; use `oregon` if unavailable on free
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+
+    envVars:
+      # --- runtime ---
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+
+      # Render terminates TLS in front of the app, and server.js already sets
+      # `trust proxy`, so the session cookie can safely be marked Secure.
+      - key: SECURE_COOKIES
+        value: "true"
+
+      # --- scheduling ---
+      # Free instances sleep after ~15 min idle, so an in-process node-cron
+      # would silently miss the 08:00 digest. Keep this false and drive the
+      # jobs over HTTP instead (see README -> Keeping the schedules running):
+      #   hourly  GET /cron/run?key=$CRON_SECRET
+      #   daily   GET /cron/daily?key=$CRON_SECRET
+      # That request wakes the service and runs the job in the same call.
+      # On a paid always-on instance, flip this to "true" and drop the pinger.
+      - key: CRON_ENABLED
+        value: "false"
+
+      # --- generated secrets (Render creates strong random values) ---
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+
+      # --- set these in the dashboard ---
+      # Connection string from Neon/TiDB. Set it BEFORE the first deploy:
+      # the app applies its schema on boot and will fail the deploy without it.
+      - key: DATABASE_URL
+        sync: false
+
+      # First owner account, created on first boot only. Choose a real
+      # password here — do not ship the changeme123 default.
+      - key: ADMIN_NAME
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+
+      # Public URL, e.g. https://workpulse.onrender.com — only used to add a
+      # link to reminder messages. Fill it in after the first deploy.
+      - key: APP_URL
+        sync: false
+
+      # Optional channels. Leave unset to keep them off; the app degrades to
+      # manual wa.me buttons and skips email.
+      - key: REPORT_EMAIL
+        sync: false
+      - key: REPORT_WHATSAPP
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_ID
+        sync: false
+      - key: WHATSAPP_TEMPLATE
+        sync: false
+      - key: WHATSAPP_TEMPLATE_LANG
+        sync: false

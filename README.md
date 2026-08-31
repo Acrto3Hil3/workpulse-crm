@@ -160,11 +160,38 @@ node scripts/import-sheets.js archive ./archive.csv     # old weekly scores
 
 Column names are matched loosely (`Doer`, `Task`, `First Date`, `Revision 1`, `Status`, …). Import doers first — task rows are matched to users by name. After importing, open **Scores → Rebuild older weeks** to score the imported history.
 
+## Deploying to Render
+
+The repo ships a [`render.yaml`](render.yaml) blueprint, so the service is created for you.
+
+1. **Create the database first** — Neon (Postgres) or TiDB Cloud (MySQL), per *Choosing a database* above. Copy its connection string. Keeping the database off Render means the data survives the web service being deleted or recreated.
+2. In Render: **New → Blueprint**, pick this repo. It reads `render.yaml` and configures the service — Node 20, `npm install`, `npm start`, health check on `/health`. There is no build step.
+3. Render prompts for the values marked `sync: false`: paste `DATABASE_URL`, and set `ADMIN_EMAIL` / `ADMIN_PASSWORD` to what you actually want the owner login to be. `SESSION_SECRET` and `CRON_SECRET` are generated for you.
+4. Deploy. First boot applies the schema and creates the owner account.
+5. Set `APP_URL` to the live URL (`https://<name>.onrender.com`) so reminder messages carry a link.
+
+`SECURE_COOKIES` is already `true` in the blueprint — Render terminates TLS and `server.js` sets `trust proxy`, so the session cookie is correctly marked Secure.
+
+> `DATABASE_URL` must be set **before** the first deploy. The app applies its schema on boot, so without a reachable database the deploy fails rather than starting up half-configured.
+
+### Keeping the schedules running
+
+Free Render instances sleep after ~15 minutes idle. An in-process `node-cron` would sleep with them and silently miss the morning digest, so the blueprint sets `CRON_ENABLED=false` and you drive the jobs over HTTP instead. Point any free scheduler (cron-job.org, UptimeRobot) at:
+
+| When | URL |
+|---|---|
+| Hourly | `https://<app>.onrender.com/cron/run?key=<CRON_SECRET>` |
+| Once daily, ~08:00 | `https://<app>.onrender.com/cron/daily?key=<CRON_SECRET>` |
+
+The request wakes the instance and runs the job in the same call. Sessions live in the database, so sleeping never logs anyone out. On a paid always-on instance, set `CRON_ENABLED=true` and drop the pinger.
+
+Two limits worth knowing on the free plan: the first request after a sleep takes roughly a minute, and pinging often enough to stay permanently awake runs close to the monthly instance-hour allowance. Check Render's current free-tier terms — they change.
+
 ## Environment variables
 
 | Variable | Meaning |
 |---|---|
-| `PORT` | Port the app listens on (default 3000) |
+| `PORT` | Port the app listens on (default 3000; Render sets this automatically) |
 | `APP_NAME` | Name shown in the header (e.g. "BMP CRM") |
 | `APP_TZ` | Business timezone — week boundaries follow it (e.g. `Asia/Kolkata`) |
 | `SESSION_SECRET` | Long random string; cookie signing |
