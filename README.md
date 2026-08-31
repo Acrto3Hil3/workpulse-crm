@@ -72,7 +72,7 @@ The app runs unchanged on PostgreSQL or MySQL. Put one connection string in `DAT
 6. `npm start` — the first boot creates every table in TiDB and the owner account.
 
 Notes that save time:
-- **If the password contains `@`, `/`, `#` or `:`**, either regenerate it or skip `DATABASE_URL` and use the plain variables instead: `DB_HOST`, `DB_PORT=4000`, `DB_USER`, `DB_PASS`, `DB_NAME=test`, `DB_SSL=true`.
+- **If the password contains `#`, `/`, `?` or `%`**, the URL will not parse and the app dies on boot with `Invalid URL`. Either regenerate the password, percent-encode those characters (`#` → `%23`, `/` → `%2F`, `?` → `%3F`, `%` → `%25`), or skip `DATABASE_URL` and use the plain variables instead: `DB_HOST`, `DB_PORT=4000`, `DB_USER`, `DB_PASS`, `DB_NAME=test`, `DB_SSL=true`. Other punctuation — `@ : & + $` — is parsed correctly and needs no escaping.
 - **IP allowlist:** the public endpoint only accepts listed IPs. In the Connect dialog set it to allow access from anywhere while testing, then narrow it to your Hostinger server's IP for production.
 - TLS is on automatically (TiDB requires it). Set `DB_SSL_VERIFY=true` to also verify the certificate.
 - The app detects TiDB on first boot and switches its tables to continuous ID allocation, so task numbers stay tidy (T-0001, T-0002 …) instead of jumping by 30000 after a restart.
@@ -181,7 +181,9 @@ The repo ships a [`render.yaml`](render.yaml) blueprint, so the service is creat
 2. In Render: **New → Blueprint**, pick this repo. It reads `render.yaml` and configures the service — Node 20, `npm install`, `npm start`, health check on `/health`. There is no build step.
 3. Render prompts for the values marked `sync: false`: paste `DATABASE_URL`, and set `ADMIN_EMAIL` / `ADMIN_PASSWORD` to what you actually want the owner login to be. `SESSION_SECRET` and `CRON_SECRET` are generated for you.
 4. Deploy. First boot applies the schema and creates the owner account.
-5. Set `APP_URL` to the live URL (`https://<name>.onrender.com`) so reminder messages carry a link.
+5. Set `APP_URL` to the live URL (`https://workpulse-crm.onrender.com`) so reminder messages carry a link.
+
+The blueprint names the service `workpulse-crm`, which is what makes the URL `https://workpulse-crm.onrender.com`. Render subdomains are globally unique and a taken name silently gets a random suffix, so if you rename the service, check the name is free first — an unclaimed subdomain answers with the header `x-render-routing: no-server`.
 
 `SECURE_COOKIES` is already `true` in the blueprint — Render terminates TLS and `server.js` sets `trust proxy`, so the session cookie is correctly marked Secure.
 
@@ -193,8 +195,8 @@ Free Render instances sleep after ~15 minutes idle. An in-process `node-cron` wo
 
 | When | URL |
 |---|---|
-| Hourly | `https://<app>.onrender.com/cron/run?key=<CRON_SECRET>` |
-| Once daily, ~08:00 | `https://<app>.onrender.com/cron/daily?key=<CRON_SECRET>` |
+| Hourly | `https://workpulse-crm.onrender.com/cron/run?key=<CRON_SECRET>` |
+| Once daily, ~08:00 | `https://workpulse-crm.onrender.com/cron/daily?key=<CRON_SECRET>` |
 
 The request wakes the instance and runs the job in the same call. Sessions live in the database, so sleeping never logs anyone out. On a paid always-on instance, set `CRON_ENABLED=true` and drop the pinger.
 

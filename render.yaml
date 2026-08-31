@@ -10,7 +10,12 @@
 
 services:
   - type: web
-    name: workpulse
+    # This becomes the live URL: https://workpulse-crm.onrender.com
+    # Render subdomains are globally unique — plain `workpulse` is already
+    # claimed by another account, and a taken name gets a random suffix
+    # appended. Check availability before renaming: a free name returns
+    # `x-render-routing: no-server`.
+    name: workpulse-crm
     runtime: node
     plan: free
     region: singapore # closest to IST users; use `oregon` if unavailable on free
