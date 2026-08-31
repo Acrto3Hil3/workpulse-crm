@@ -164,7 +164,20 @@ Column names are matched loosely (`Doer`, `Task`, `First Date`, `Revision 1`, `S
 
 The repo ships a [`render.yaml`](render.yaml) blueprint, so the service is created for you.
 
-1. **Create the database first** — Neon (Postgres) or TiDB Cloud (MySQL), per *Choosing a database* above. Copy its connection string. Keeping the database off Render means the data survives the web service being deleted or recreated.
+1. **Create the database first** — TiDB Cloud (MySQL) or Neon (Postgres), per *Choosing a database* above. Copy its connection string. Keeping the database off Render means the data survives the web service being deleted or recreated.
+
+   On **TiDB Cloud**, build the URL by hand from the *Connect* dialog:
+
+   ```
+   mysql://<user>.root:<password>@gateway01.<region>.prod.aws.tidbcloud.com:4000/<database>
+   ```
+
+   Two things bite here:
+
+   - **The `:4000` is mandatory.** TiDB does not use 3306, and omitting the port makes the app fall back to 3306 and fail to connect.
+   - **Percent-encode `#`, `/`, `?` and `%` if they appear in the generated password** — `#` → `%23`, `/` → `%2F`, `?` → `%3F`, `%` → `%25`. Any of those four makes the URL unparseable and the app dies on boot with `Invalid URL`. Other punctuation (`@ : & + $`) is parsed correctly and needs no encoding.
+
+   TLS needs no configuration: the app enables it automatically for any non-local host.
 2. In Render: **New → Blueprint**, pick this repo. It reads `render.yaml` and configures the service — Node 20, `npm install`, `npm start`, health check on `/health`. There is no build step.
 3. Render prompts for the values marked `sync: false`: paste `DATABASE_URL`, and set `ADMIN_EMAIL` / `ADMIN_PASSWORD` to what you actually want the owner login to be. `SESSION_SECRET` and `CRON_SECRET` are generated for you.
 4. Deploy. First boot applies the schema and creates the owner account.
