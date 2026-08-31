@@ -26,6 +26,13 @@ services:
       - key: NODE_ENV
         value: production
 
+      # Business timezone. server.js copies this into process.env.TZ, so it
+      # drives "today", the Sunday-Saturday week boundaries and the 08:00
+      # digest. Render's containers are UTC — without this, weeks roll over at
+      # 05:30 IST and the morning digest goes out at the wrong hour.
+      - key: APP_TZ
+        value: Asia/Kolkata
+
       # Render terminates TLS in front of the app, and server.js already sets
       # `trust proxy`, so the session cookie can safely be marked Secure.
       - key: SECURE_COOKIES
