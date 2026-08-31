@@ -1,0 +1,27 @@
+<%- include('../partials/top', { title }) %>
+
+<div class="pagehead"><h1>Assign a task</h1></div>
+
+<form method="post" action="/delegations" class="card stack form-narrow">
+  <label class="field">
+    <span>Who does it? *</span>
+    <select name="doer_id" required>
+      <option value="">Choose a person…</option>
+      <% doers.forEach(d => { %>
+        <option value="<%= d.id %>" <%= selectedDoer === d.id ? 'selected' : '' %>><%= d.name %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label class="field">
+    <span>What is the task? *</span>
+    <textarea name="description" rows="3" required maxlength="500" placeholder="e.g. Send the pending GST invoices to the accountant"></textarea>
+  </label>
+  <label class="field">
+    <span>Done by (first date) *</span>
+    <input type="date" name="first_date" required value="<%= h.today %>">
+  </label>
+  <p class="muted small">If the deadline moves later, use “Move date” on the task — every move is counted, so slipping tasks stay visible.</p>
+  <button class="btn btn-primary btn-big btn-block" type="submit">Assign task</button>
+</form>
+
+<%- include('../partials/bottom') %>

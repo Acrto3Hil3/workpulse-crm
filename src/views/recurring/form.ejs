@@ -1,0 +1,34 @@
+<%- include('../partials/top', { title }) %>
+
+<div class="pagehead"><h1><%= type === 'fms' ? 'New follow-up (FMS)' : 'New checklist item' %></h1></div>
+
+<form method="post" action="/recurring" class="card stack form-narrow">
+  <input type="hidden" name="type" value="<%= type %>">
+  <label class="field">
+    <span>What needs doing? *</span>
+    <input type="text" name="name" required maxlength="200" placeholder="<%= type === 'fms' ? 'e.g. Follow up pending customer payments' : 'e.g. Backup the billing computer' %>">
+  </label>
+  <label class="field">
+    <span>Who does it? *</span>
+    <select name="doer_id" required>
+      <option value="">Choose a person…</option>
+      <% doers.forEach(d => { %><option value="<%= d.id %>"><%= d.name %></option><% }) %>
+    </select>
+  </label>
+  <label class="field">
+    <span>How is it done? <span class="muted">(optional)</span></span>
+    <textarea name="method" rows="2" maxlength="500" placeholder="Short note on the method"></textarea>
+  </label>
+  <label class="field">
+    <span>How often?</span>
+    <select name="frequency">
+      <option value="daily">Every day</option>
+      <option value="weekly" selected>Every week</option>
+      <option value="monthly">Every month</option>
+    </select>
+  </label>
+  <p class="muted small">A fresh entry is created automatically each cycle. Marking it done records the date, and any delay is counted.</p>
+  <button class="btn btn-primary btn-big btn-block" type="submit">Add item</button>
+</form>
+
+<%- include('../partials/bottom') %>

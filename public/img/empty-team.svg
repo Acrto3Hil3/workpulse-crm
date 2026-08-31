@@ -1,0 +1,25 @@
+<!-- Empty-state art: a preview of what the dashboard becomes once doers exist. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140" width="220" height="140" role="img" aria-label="">
+  <g font-family="system-ui, sans-serif">
+    <!-- card 1 -->
+    <rect x="10" y="8"  width="200" height="36" rx="9" fill="#fff" stroke="#dfe3e9"/>
+    <rect x="10" y="8"  width="5"   height="36" rx="2.5" fill="#1b7f3b"/>
+    <rect x="26" y="18" width="74"  height="7"  rx="3.5" fill="#c9d2e0"/>
+    <rect x="26" y="30" width="46"  height="5"  rx="2.5" fill="#e6eaf0"/>
+    <rect x="160" y="19" width="38" height="14" rx="7" fill="#e2f3e7"/>
+
+    <!-- card 2 -->
+    <rect x="10" y="52" width="200" height="36" rx="9" fill="#fff" stroke="#dfe3e9"/>
+    <rect x="10" y="52" width="5"   height="36" rx="2.5" fill="#e5c65e"/>
+    <rect x="26" y="62" width="60"  height="7"  rx="3.5" fill="#c9d2e0"/>
+    <rect x="26" y="74" width="52"  height="5"  rx="2.5" fill="#e6eaf0"/>
+    <rect x="160" y="63" width="38" height="14" rx="7" fill="#fdf0c2"/>
+
+    <!-- card 3 -->
+    <rect x="10" y="96" width="200" height="36" rx="9" fill="#fff" stroke="#dfe3e9"/>
+    <rect x="10" y="96" width="5"   height="36" rx="2.5" fill="#b42323"/>
+    <rect x="26" y="106" width="84" height="7"  rx="3.5" fill="#c9d2e0"/>
+    <rect x="26" y="118" width="40" height="5"  rx="2.5" fill="#e6eaf0"/>
+    <rect x="160" y="107" width="38" height="14" rx="7" fill="#fbe5e5"/>
+  </g>
+</svg>

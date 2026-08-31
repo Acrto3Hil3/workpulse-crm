@@ -1,0 +1,33 @@
+<%- include('../partials/top', { title }) %>
+
+<div class="pagehead"><h1><%= person ? 'Edit ' + person.name : 'Add person' %></h1></div>
+
+<form method="post" action="<%= person ? '/doers/' + person.id : '/doers' %>" class="card stack form-narrow">
+  <label class="field">
+    <span>Full name *</span>
+    <input type="text" name="name" required maxlength="100" value="<%= person ? person.name : '' %>">
+  </label>
+  <label class="field">
+    <span>Phone number <span class="muted">(they log in with this)</span></span>
+    <input type="tel" name="phone" maxlength="30" inputmode="tel" value="<%= person && person.phone ? person.phone : '' %>">
+  </label>
+  <label class="field">
+    <span>Email <span class="muted">(optional)</span></span>
+    <input type="email" name="email" maxlength="190" value="<%= person && person.email ? person.email : '' %>">
+  </label>
+  <label class="field">
+    <span>Role</span>
+    <select name="role">
+      <option value="doer" <%= !person || person.role === 'doer' ? 'selected' : '' %>>Doer — does the work, sees only their tasks</option>
+      <option value="manager" <%= person && person.role === 'manager' ? 'selected' : '' %>>Manager / EA — assigns tasks, sees all scores</option>
+      <option value="owner" <%= person && person.role === 'owner' ? 'selected' : '' %>>Owner — full control</option>
+    </select>
+  </label>
+  <label class="field">
+    <span><%= person ? 'New password (leave blank to keep current)' : 'Password *' %></span>
+    <input type="text" name="password" maxlength="72" <%= person ? '' : 'required' %> placeholder="Simple is fine, e.g. a 4-digit PIN">
+  </label>
+  <button class="btn btn-primary btn-big btn-block" type="submit">Save</button>
+</form>
+
+<%- include('../partials/bottom') %>

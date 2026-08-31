@@ -1,0 +1,61 @@
+<%- include('partials/top', { title }) %>
+
+<div class="pagehead"><h1>Settings</h1></div>
+
+<div class="card stack form-narrow">
+  <h2>Where you receive reports</h2>
+  <p class="muted small">The daily overdue report and Sunday score summary go to these addresses (set <code>REPORT_EMAIL</code> and <code>REPORT_WHATSAPP</code> in <code>.env</code>, comma-separated for more than one). Empty = they go to every owner account's email/phone.</p>
+  <p>📧 <strong><%= reports.emails.length ? reports.emails.join(', ') : 'owner accounts (default)' %></strong><br>
+     💬 <strong><%= reports.phones.length ? reports.phones.join(', ') : 'owner accounts (default)' %></strong></p>
+  <div class="actions-row">
+    <form method="post" action="/settings/send-report"><button class="btn" type="submit">Send overdue report now</button></form>
+    <form method="post" action="/settings/send-summary"><button class="btn" type="submit">Send weekly summary now</button></form>
+  </div>
+</div>
+
+<div class="card stack form-narrow">
+  <h2>Email channel</h2>
+  <% if (mail.enabled) { %>
+    <p><span class="badge badge-green">ON</span>
+      <% if (mail.testMode) { %> — <strong>test mode</strong>: emails print to the server log, nothing is sent.<% } else { %> — sending as <strong><%= mail.from %></strong><% } %></p>
+    <form method="post" action="/settings/test-email"><button class="btn" type="submit">Send test email</button></form>
+  <% } else { %>
+    <p><span class="badge badge-gray">OFF</span> — set <code>SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS</code> in <code>.env</code> and restart. A Hostinger mailbox works directly (<code>smtp.hostinger.com</code>, port 465).</p>
+  <% } %>
+</div>
+
+<div class="card stack form-narrow">
+  <h2>WhatsApp channel</h2>
+  <% if (wa.enabled) { %>
+    <p><span class="badge badge-green">ON</span>
+      <% if (wa.testMode) { %> — <strong>test mode</strong>: messages print to the server log, nothing is sent.<% } else if (wa.template) { %> — using template <strong><%= wa.template %></strong>.<% } else { %> — free-form text mode (recipients must have messaged your business number within 24h; set <code>WHATSAPP_TEMPLATE</code> for always-deliver reminders).<% } %></p>
+    <form method="post" action="/settings/test-whatsapp"><button class="btn" type="submit">Send test WhatsApp</button></form>
+  <% } else { %>
+    <p><span class="badge badge-gray">OFF</span> — set <code>WHATSAPP_TOKEN</code> and <code>WHATSAPP_PHONE_ID</code> in <code>.env</code> and restart (Meta WhatsApp Cloud API — see the README for the 10-minute setup). Until then, the manual 💬 buttons on each doer's page still work with no setup.</p>
+  <% } %>
+</div>
+
+<div class="card stack form-narrow">
+  <h2>Daily reminders to doers</h2>
+  <p class="muted small">Every morning at 08:00, each doer with pending work gets their digest (overdue → due today → routine) on their email and/or WhatsApp number — whatever their account has.</p>
+  <form method="post" action="/settings/send-digests"><button class="btn" type="submit">Send digests now</button></form>
+</div>
+
+<div class="card stack form-narrow">
+  <h2>Scheduled jobs</h2>
+  <% if (cronInProcess) { %>
+    <p><span class="badge badge-green">IN-PROCESS</span> — the app runs its own schedule (entry generation, scoring, reminders, reports). Nothing else to set up.</p>
+  <% } else { %>
+    <p><span class="badge badge-yellow">EXTERNAL</span> — set up two cron jobs on your hosting panel:</p>
+    <p class="formula">hourly: /cron/run?key=…<br>daily 08:00: /cron/daily?key=…</p>
+  <% } %>
+  <p class="muted small">Timezone: <strong><%= appTz %></strong> — weeks run Sunday to Saturday in this timezone.</p>
+</div>
+
+<div class="card stack form-narrow">
+  <h2>Scoring</h2>
+  <p class="muted small">The score formula is fixed (shortfall from 100% completion); the red/yellow/green bands are yours to tune.</p>
+  <a class="btn" href="/scores/thresholds">⚙ Rating bands</a>
+</div>
+
+<%- include('partials/bottom') %>

@@ -1,0 +1,24 @@
+<%- include('../partials/top', { title }) %>
+
+<div class="pagehead"><h1>Rating settings</h1></div>
+
+<div class="card stack form-narrow">
+  <p>The weekly score measures shortfall from 100% completion:</p>
+  <p class="formula">score = (done ÷ planned − 1) × 100 &nbsp; <span class="muted">(0 is best, −100 is worst)</span></p>
+  <p class="muted">Set the minimum score for each rating. Example: green at −10 means a doer stays green while completing 90% or more of their week.</p>
+
+  <form method="post" action="/scores/thresholds" class="stack">
+    <label class="field">
+      <span><span class="badge badge-green">GREEN</span> when score is at least</span>
+      <input type="number" name="green" step="1" min="-100" max="0" required value="<%= th.green %>">
+    </label>
+    <label class="field">
+      <span><span class="badge badge-yellow">YELLOW</span> when score is at least</span>
+      <input type="number" name="yellow" step="1" min="-100" max="0" required value="<%= th.yellow %>">
+    </label>
+    <p class="muted small">Anything below yellow is <span class="badge badge-red">RED</span>.</p>
+    <button class="btn btn-primary btn-big btn-block" type="submit">Save</button>
+  </form>
+</div>
+
+<%- include('../partials/bottom') %>

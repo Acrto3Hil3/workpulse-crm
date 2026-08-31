@@ -1,0 +1,26 @@
+<%- include('partials/top', { title }) %>
+
+<div class="pagehead"><h1>My scores</h1><div class="muted">0 = everything done · −100 = nothing done</div></div>
+
+<% if (!scores.length) { %>
+  <div class="card muted center">No scores yet — they appear after your first review week.</div>
+<% } else { %>
+<div class="table-wrap card">
+  <table>
+    <thead><tr><th>Week</th><th>Planned</th><th>Done</th><th>Score</th><th>Rating</th></tr></thead>
+    <tbody>
+      <% scores.forEach(s => { %>
+      <tr>
+        <td>W<%= s.week_number %> · <%= h.fmtNice(s.week_start) %></td>
+        <td><%= s.planned_count %></td>
+        <td><%= s.actual_count %></td>
+        <td><%= h.score(s.score) %></td>
+        <td><span class="badge badge-<%= s.rating %>"><%= s.rating.toUpperCase() %></span></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<%- include('partials/bottom') %>

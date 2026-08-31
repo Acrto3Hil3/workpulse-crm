@@ -1,0 +1,32 @@
+<%- include('partials/top', { title }) %>
+
+<div class="pagehead">
+  <h1>Activity</h1>
+  <div class="muted"><%= total %> action<%= total == 1 ? '' : 's' %> recorded</div>
+</div>
+
+<% if (!rows.length) { %>
+  <div class="card muted center">Nothing yet — actions appear here as the team works.</div>
+<% } else { %>
+<div class="card act-list">
+  <% rows.forEach(r => { %>
+  <div class="act-row">
+    <div class="act-main">
+      <div><strong><%= r.actor_name || 'System' %></strong> <%= labels[r.action] || r.action %><% if (r.subject_name && r.subject_name !== r.actor_name) { %> <span class="muted">for</span> <a href="/doers/<%= r.subject_user_id %>"><%= r.subject_name %></a><% } %></div>
+      <% if (r.detail) { %><div class="muted small"><%= r.detail %></div><% } %>
+    </div>
+    <div class="muted small nowrap"><%= h.fmtDT(r.created_at) %></div>
+  </div>
+  <% }) %>
+</div>
+
+<% if (pages > 1) { %>
+<div class="pager">
+  <% if (page > 1) { %><a class="btn" href="/activity?page=<%= page - 1 %>">← Newer</a><% } %>
+  <span class="muted">Page <%= page %> of <%= pages %></span>
+  <% if (page < pages) { %><a class="btn" href="/activity?page=<%= page + 1 %>">Older →</a><% } %>
+</div>
+<% } %>
+<% } %>
+
+<%- include('partials/bottom') %>

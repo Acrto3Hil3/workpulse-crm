@@ -1,0 +1,34 @@
+<%- include('../partials/top', { title }) %>
+
+<div class="pagehead">
+  <h1>Team</h1>
+  <% if (user.role === 'owner') { %><a class="btn btn-primary" href="/doers/new">＋ Add person</a><% } %>
+</div>
+
+<div class="table-wrap card">
+  <table>
+    <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Status</th><% if (user.role === 'owner') { %><th></th><% } %></tr></thead>
+    <tbody>
+      <% people.forEach(p => { %>
+      <tr class="<%= p.active ? '' : 'row-dim' %>">
+        <td><a href="/doers/<%= p.id %>"><strong><%= p.name %></strong></a><% if (p.email) { %><div class="muted small"><%= p.email %></div><% } %></td>
+        <td><% if (p.phone) { %><a href="tel:<%= p.phone %>"><%= p.phone %></a><% } else { %>—<% } %></td>
+        <td><span class="badge badge-<%= p.role === 'doer' ? 'gray' : 'blue' %>"><%= p.role.toUpperCase() %></span></td>
+        <td><%= p.active ? 'Active' : 'Off' %></td>
+        <% if (user.role === 'owner') { %>
+        <td class="row-actions">
+          <a class="btn btn-sm" href="/doers/<%= p.id %>/edit">Edit</a>
+          <% if (p.id !== user.id) { %>
+          <form method="post" action="/doers/<%= p.id %>/toggle">
+            <button class="btn btn-sm" type="submit"><%= p.active ? 'Deactivate' : 'Activate' %></button>
+          </form>
+          <% } %>
+        </td>
+        <% } %>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/bottom') %>

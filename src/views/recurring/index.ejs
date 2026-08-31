@@ -1,0 +1,58 @@
+<%- include('../partials/top', { title }) %>
+
+<div class="pagehead">
+  <h1>Routine work</h1>
+  <a class="btn btn-primary" href="/recurring/new?type=<%= type %>">＋ Add item</a>
+</div>
+
+<div class="tabs">
+  <a class="tab <%= type === 'fms' ? 'on' : '' %>" href="/recurring?type=fms">Follow-ups (FMS)</a>
+  <a class="tab <%= type === 'checklist' ? 'on' : '' %>" href="/recurring?type=checklist">Checklist</a>
+</div>
+
+<section class="section">
+  <h2 class="section-title">Due now (<%= dueNow.length %>)</h2>
+  <% if (!dueNow.length) { %><div class="card muted center">Everything is done for this cycle 🎉</div><% } %>
+  <% dueNow.forEach(e => { %>
+    <div class="taskrow <%= e.status === 'missed' ? 'taskrow-red' : '' %>">
+      <div class="taskrow-main">
+        <div class="taskrow-title"><%= e.name %></div>
+        <div class="taskrow-meta">
+          <span class="muted"><%= e.doer_name %></span>
+          <span class="chip <%= e.status === 'missed' ? 'chip-red' : '' %>"><%= e.status === 'missed' ? 'Late — was due' : 'By' %> <%= h.fmtNice(e.planned_date) %></span>
+        </div>
+      </div>
+      <form method="post" action="/recurring/entries/<%= e.id %>/done">
+        <button class="btn btn-success" type="submit">✓ Done</button>
+      </form>
+    </div>
+  <% }) %>
+</section>
+
+<section class="section">
+  <h2 class="section-title">All <%= type === 'fms' ? 'follow-up' : 'checklist' %> items</h2>
+  <% if (!items.length) { %><div class="card muted center">None yet — add the first one</div><% } else { %>
+  <div class="table-wrap card">
+    <table>
+      <thead><tr><th>Item</th><th>Person</th><th>How often</th><th>Pending</th><th></th></tr></thead>
+      <tbody>
+        <% items.forEach(i => { %>
+        <tr class="<%= i.active ? '' : 'row-dim' %>">
+          <td><strong><%= i.name %></strong><% if (i.method) { %><div class="muted small"><%= i.method %></div><% } %></td>
+          <td><a href="/doers/<%= i.doer_id %>"><%= i.doer_name %></a></td>
+          <td><%= i.frequency %></td>
+          <td class="center"><%= i.pending || '—' %></td>
+          <td class="row-actions">
+            <form method="post" action="/recurring/<%= i.id %>/toggle">
+              <button class="btn btn-sm" type="submit"><%= i.active ? 'Pause' : 'Resume' %></button>
+            </form>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</section>
+
+<%- include('../partials/bottom') %>

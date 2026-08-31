@@ -1,0 +1,65 @@
+<%- include('partials/top', { title }) %>
+
+<div class="pagehead">
+  <h1>Team dashboard</h1>
+  <div class="muted">Week <%= weekNumber %> · <%= h.fmtNice(ws) %> – <%= h.fmtNice(we) %></div>
+</div>
+
+<div class="actions-row">
+  <a class="btn btn-primary" href="/delegations/new">＋ Assign task</a>
+  <% if (user.role === 'owner') { %><a class="btn" href="/doers/new">＋ Add person</a><% } %>
+  <form method="post" action="/scores/recompute"><button class="btn" type="submit">↻ Refresh scores</button></form>
+  <% if (user.role === 'owner') { %><a class="btn" href="/settings">⚙ Settings</a><% } %>
+</div>
+
+<% if (!tiles.length) { %>
+  <div class="card center stack empty">
+    <img class="empty-art" src="/img/empty-team.svg" width="220" height="140" alt="">
+    <p><strong>No team members yet.</strong></p>
+    <p class="muted">Add your first doer, then assign them a task. Scores appear automatically every week.</p>
+    <% if (user.role === 'owner') { %><a class="btn btn-primary btn-big" href="/doers/new">Add your first doer</a><% } %>
+  </div>
+<% } else { %>
+
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-num"><%= totals.planned %></div><div class="kpi-label">Planned this week</div></div>
+    <div class="kpi"><div class="kpi-num"><%= totals.actual %></div><div class="kpi-label">Done this week</div></div>
+    <div class="kpi <%= totals.overdue ? 'kpi-red' : '' %>"><div class="kpi-num"><%= totals.overdue %></div><div class="kpi-label">Overdue</div></div>
+  </div>
+
+  <div class="tiles">
+    <% tiles.forEach(t => { const r = t.rating || null; %>
+      <a class="tile tile-<%= r || 'gray' %>" href="/doers/<%= t.id %>">
+        <div class="tile-top">
+          <strong class="tile-name"><%= t.name %></strong>
+          <% if (r) { %>
+            <span class="badge badge-<%= r %>"><%= r.toUpperCase() %> · <%= h.score(t.score) %></span>
+          <% } else { %>
+            <span class="badge badge-gray">NO DATA</span>
+          <% } %>
+        </div>
+        <div class="tile-stats">Planned <strong><%= t.planned_count || 0 %></strong> · Done <strong><%= t.actual_count || 0 %></strong></div>
+        <div class="tile-stats muted"><%= t.open_tasks %> open task<%= t.open_tasks == 1 ? '' : 's' %><%= t.overdue ? ` · ${t.overdue} overdue` : '' %></div>
+      </a>
+    <% }) %>
+  </div>
+
+  <% if (recent && recent.length) { %>
+  <section class="section">
+    <h2 class="section-title">Recent activity <a class="muted small" href="/activity">see all →</a></h2>
+    <div class="card act-list">
+      <% recent.forEach(r => { %>
+      <div class="act-row">
+        <div class="act-main">
+          <div><strong><%= r.actor_name || 'System' %></strong> <%= labels[r.action] || r.action %></div>
+          <% if (r.detail) { %><div class="muted small"><%= r.detail %></div><% } %>
+        </div>
+        <div class="muted small nowrap"><%= h.fmtDT(r.created_at) %></div>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+<% } %>
+
+<%- include('partials/bottom') %>

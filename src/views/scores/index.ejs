@@ -1,0 +1,63 @@
+<%- include('../partials/top', { title }) %>
+
+<div class="pagehead">
+  <h1>Weekly scores</h1>
+  <div class="muted">0 = everything done · −100 = nothing done</div>
+</div>
+
+<div class="actions-row">
+  <form method="post" action="/scores/recompute"><button class="btn" type="submit">↻ Refresh scores</button></form>
+  <a class="btn" href="/scores/export.csv">⬇ Export CSV</a>
+  <% if (user.role === 'owner') { %><a class="btn" href="/scores/thresholds">⚙ Rating settings</a><% } %>
+</div>
+
+<% if (!doers.length) { %>
+  <div class="card muted center">Add doers first — their weekly scores will appear here.</div>
+<% } else { %>
+<div class="table-wrap card">
+  <table class="matrix">
+    <thead>
+      <tr>
+        <th class="sticky-col">Person</th>
+        <% weekStarts.forEach((ws, i) => { %>
+          <th class="center"><div>W<%= weekNumbers[i] %></div><div class="muted small"><%= h.fmtNice(ws) %></div></th>
+        <% }) %>
+      </tr>
+    </thead>
+    <tbody>
+      <% doers.forEach(d => { const cells = byDoer.get(d.id) || {}; %>
+      <tr>
+        <td class="sticky-col"><a href="/doers/<%= d.id %>"><strong><%= d.name %></strong></a></td>
+        <% weekStarts.forEach(ws => { const s = cells[ws]; %>
+          <% if (s) { %>
+            <td class="center cell-<%= s.rating %>" title="<%= s.actual_count %>/<%= s.planned_count %> done">
+              <div class="cell-score"><%= h.score(s.score) %></div>
+              <div class="cell-frac"><%= s.actual_count %>/<%= s.planned_count %></div>
+            </td>
+          <% } else { %>
+            <td class="center muted">—</td>
+          <% } %>
+        <% }) %>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<div class="legend">
+  <span class="badge badge-green">GREEN — on track</span>
+  <span class="badge badge-yellow">YELLOW — slipping</span>
+  <span class="badge badge-red">RED — needs attention</span>
+</div>
+
+<% if (user.role === 'owner') { %>
+<form method="post" action="/scores/recompute-history" class="inline-form muted small">
+  Rebuild older weeks:
+  <select name="weeks"><option value="12">12</option><option value="26">26</option><option value="52">52</option></select>
+  <button class="btn btn-sm" type="submit">Recompute</button>
+  <span>(useful after importing old data)</span>
+</form>
+<% } %>
+<% } %>
+
+<%- include('../partials/bottom') %>

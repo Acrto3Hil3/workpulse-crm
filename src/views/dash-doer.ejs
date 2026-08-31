@@ -1,0 +1,81 @@
+<%- include('partials/top', { title }) %>
+
+<div class="pagehead">
+  <h1>Hi <%= user.name.split(' ')[0] %> 👋</h1>
+  <div class="muted">This week: <%= h.fmtNice(ws) %> – <%= h.fmtNice(we) %></div>
+</div>
+
+<% if (overdue.length) { %>
+<section class="section">
+  <h2 class="section-title danger-text">⚠️ Overdue — do these first</h2>
+  <% overdue.forEach(t => { %>
+    <div class="taskrow taskrow-red">
+      <div class="taskrow-main">
+        <div class="taskrow-title"><%= t.description %></div>
+        <div class="taskrow-meta"><span class="chip chip-red">Due <%= h.fmtNice(t.due_date) %></span>
+          <span class="muted"><%= t.public_task_id %><%= t.total_revisions ? ` · moved ${t.total_revisions}×` : '' %></span></div>
+      </div>
+      <form method="post" action="/delegations/<%= t.id %>/complete">
+        <button class="btn btn-success btn-big" type="submit">✓ Done</button>
+      </form>
+    </div>
+  <% }) %>
+</section>
+<% } %>
+
+<section class="section">
+  <h2 class="section-title">📋 Due this week</h2>
+  <% if (!dueThisWeek.length) { %>
+    <div class="card muted center">Nothing else due this week<%= overdue.length ? '' : ' — you are all caught up 🎉' %></div>
+  <% } %>
+  <% dueThisWeek.forEach(t => { %>
+    <div class="taskrow">
+      <div class="taskrow-main">
+        <div class="taskrow-title"><%= t.description %></div>
+        <div class="taskrow-meta"><span class="chip">Due <%= h.fmtNice(t.due_date) %></span>
+          <span class="muted"><%= t.public_task_id %></span></div>
+      </div>
+      <form method="post" action="/delegations/<%= t.id %>/complete">
+        <button class="btn btn-success btn-big" type="submit">✓ Done</button>
+      </form>
+    </div>
+  <% }) %>
+</section>
+
+<section class="section">
+  <h2 class="section-title">🔁 Routine work</h2>
+  <% if (!routine.length) { %>
+    <div class="card muted center">No routine items pending</div>
+  <% } %>
+  <% routine.forEach(e => { %>
+    <div class="taskrow <%= e.status === 'missed' ? 'taskrow-red' : '' %>">
+      <div class="taskrow-main">
+        <div class="taskrow-title"><%= e.name %></div>
+        <div class="taskrow-meta">
+          <span class="chip <%= e.status === 'missed' ? 'chip-red' : '' %>"><%= e.status === 'missed' ? 'Late — was due' : 'By' %> <%= h.fmtNice(e.planned_date) %></span>
+          <span class="muted"><%= e.type === 'fms' ? 'Follow-up' : 'Checklist' %></span>
+        </div>
+      </div>
+      <form method="post" action="/recurring/entries/<%= e.id %>/done">
+        <button class="btn btn-success btn-big" type="submit">✓ Done</button>
+      </form>
+    </div>
+  <% }) %>
+</section>
+
+<% if (scores.length) { %>
+<section class="section">
+  <h2 class="section-title">📊 Your last weeks</h2>
+  <div class="chips-row">
+    <% scores.slice().reverse().forEach(s => { %>
+      <div class="score-chip score-<%= s.rating %>" title="<%= s.actual_count %>/<%= s.planned_count %> done">
+        <div class="score-chip-week">W<%= s.week_number %></div>
+        <div class="score-chip-num"><%= h.score(s.score) %></div>
+      </div>
+    <% }) %>
+  </div>
+  <a class="muted small" href="/my/scores">See full history →</a>
+</section>
+<% } %>
+
+<%- include('partials/bottom') %>

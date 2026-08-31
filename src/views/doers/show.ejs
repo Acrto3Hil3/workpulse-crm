@@ -1,0 +1,107 @@
+<%- include('../partials/top', { title }) %>
+
+<div class="pagehead">
+  <h1><%= person.name %></h1>
+  <div class="muted">
+    <span class="badge badge-<%= person.role === 'doer' ? 'gray' : 'blue' %>"><%= person.role.toUpperCase() %></span>
+    <% if (person.phone) { %> · <a href="tel:<%= person.phone %>"><%= person.phone %></a><% } %>
+    <% if (!person.active) { %> · <span class="danger-text">deactivated</span><% } %>
+  </div>
+</div>
+
+<div class="actions-row">
+  <a class="btn btn-primary" href="/delegations/new?doer_id=<%= person.id %>">＋ Assign task</a>
+  <% const overdueCount = openTasks.filter(t => t.due_date < h.today).length; %>
+  <% const waAll = h.wa(person.phone, overdueCount
+       ? `Reminder from ${appName}: you have ${overdueCount} overdue task${overdueCount > 1 ? 's' : ''} and ${openTasks.length - overdueCount} more open. Please update your tasks.`
+       : `Reminder from ${appName}: you have ${openTasks.length} open task${openTasks.length === 1 ? '' : 's'}. Please update your tasks.`); %>
+  <% if (waAll && openTasks.length) { %><a class="btn btn-wa" href="<%= waAll %>" target="_blank" rel="noopener">💬 Remind on WhatsApp</a><% } %>
+  <% if (user.role === 'owner') { %><a class="btn" href="/doers/<%= person.id %>/edit">Edit</a><% } %>
+</div>
+
+<section class="section">
+  <h2 class="section-title">Last 12 weeks</h2>
+  <% if (!scores.length) { %>
+    <div class="card muted center">No scores yet</div>
+  <% } else { %>
+  <div class="chips-row">
+    <% scores.slice().reverse().forEach(s => { %>
+      <div class="score-chip score-<%= s.rating %>" title="<%= s.actual_count %>/<%= s.planned_count %> done">
+        <div class="score-chip-week">W<%= s.week_number %></div>
+        <div class="score-chip-num"><%= h.score(s.score) %></div>
+      </div>
+    <% }) %>
+  </div>
+  <% } %>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Open tasks (<%= openTasks.length %>)</h2>
+  <% if (!openTasks.length) { %><div class="card muted center">No open tasks</div><% } %>
+  <% openTasks.forEach(t => { %>
+    <div class="taskrow <%= t.due_date < h.today ? 'taskrow-red' : '' %>">
+      <div class="taskrow-main">
+        <div class="taskrow-title"><%= t.description %></div>
+        <div class="taskrow-meta">
+          <span class="chip <%= t.due_date < h.today ? 'chip-red' : '' %>">Due <%= h.fmtNice(t.due_date) %></span>
+          <span class="badge badge-<%= h.statusClass(t.status) %>"><%= h.statusLabel(t.status) %></span>
+          <span class="muted"><%= t.public_task_id %><%= t.total_revisions ? ` · moved ${t.total_revisions}×` : '' %></span>
+        </div>
+      </div>
+      <div class="row-actions">
+        <form method="post" action="/delegations/<%= t.id %>/complete">
+          <button class="btn btn-success" type="submit">✓ Done</button>
+        </form>
+        <% if (t.due_date < h.today) { const waTask = h.wa(person.phone, `Reminder from ${appName}: "${t.description}" was due ${h.fmtFull(t.due_date)}. Please complete it and mark it done.`); %>
+          <% if (waTask) { %><a class="btn btn-sm btn-wa" href="<%= waTask %>" target="_blank" rel="noopener">💬 Remind</a><% } %>
+        <% } %>
+        <details class="push">
+          <summary class="btn btn-sm">Move date</summary>
+          <form method="post" action="/delegations/<%= t.id %>/revise" class="push-form">
+            <input type="date" name="new_date" required min="<%= h.today %>">
+            <button class="btn btn-sm btn-primary" type="submit">Save</button>
+          </form>
+        </details>
+      </div>
+    </div>
+  <% }) %>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Routine items (<%= items.length %>)</h2>
+  <% if (!items.length) { %><div class="card muted center">None set up</div><% } %>
+  <% items.forEach(i => { %>
+    <div class="taskrow <%= i.active ? '' : 'row-dim' %>">
+      <div class="taskrow-main">
+        <div class="taskrow-title"><%= i.name %></div>
+        <div class="taskrow-meta">
+          <span class="chip"><%= i.type === 'fms' ? 'Follow-up' : 'Checklist' %> · <%= i.frequency %></span>
+          <% if (i.pending) { %><span class="chip chip-yellow"><%= i.pending %> pending</span><% } %>
+          <% if (!i.active) { %><span class="muted">inactive</span><% } %>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+</section>
+
+<% if (recentDone.length) { %>
+<section class="section">
+  <h2 class="section-title">Recently completed</h2>
+  <% recentDone.forEach(t => { %>
+    <div class="taskrow row-dim">
+      <div class="taskrow-main">
+        <div class="taskrow-title"><%= t.description %></div>
+        <div class="taskrow-meta">
+          <span class="chip chip-green">Done <%= h.fmtNice(t.completed_at) %></span>
+          <span class="muted"><%= t.public_task_id %><%= t.total_revisions ? ` · moved ${t.total_revisions}×` : '' %></span>
+        </div>
+      </div>
+      <form method="post" action="/delegations/<%= t.id %>/reopen">
+        <button class="btn btn-sm" type="submit">Reopen</button>
+      </form>
+    </div>
+  <% }) %>
+</section>
+<% } %>
+
+<%- include('../partials/bottom') %>

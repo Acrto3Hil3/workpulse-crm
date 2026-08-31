@@ -1,0 +1,82 @@
+<%- include('../partials/top', { title }) %>
+
+<div class="pagehead">
+  <h1>Tasks</h1>
+  <a class="btn btn-primary" href="/delegations/new">＋ Assign task</a>
+</div>
+
+<form method="get" action="/delegations" class="filter-bar">
+  <select name="doer_id" data-autosubmit>
+    <option value="">All people</option>
+    <% doers.forEach(d => { %>
+      <option value="<%= d.id %>" <%= filters.doer_id === d.id ? 'selected' : '' %>><%= d.name %></option>
+    <% }) %>
+  </select>
+  <select name="status" data-autosubmit>
+    <option value="">All statuses</option>
+    <option value="assigned" <%= filters.status === 'assigned' ? 'selected' : '' %>>Assigned</option>
+    <option value="week_shifted" <%= filters.status === 'week_shifted' ? 'selected' : '' %>>Week shifted</option>
+    <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Completed</option>
+  </select>
+  <input type="search" name="q" placeholder="Search…" value="<%= filters.q %>">
+  <button class="btn" type="submit">Filter</button>
+</form>
+
+<% if (!rows.length) { %>
+  <div class="card muted center">No tasks found</div>
+<% } else { %>
+<div class="table-wrap card">
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Person</th><th>Task</th><th>First date</th><th>Due</th><th>Moved</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% rows.forEach(t => { %>
+      <tr>
+        <td class="nowrap muted"><%= t.public_task_id %></td>
+        <td><a href="/doers/<%= t.doer_id %>"><%= t.doer_name %></a></td>
+        <td class="task-desc"><%= t.description %></td>
+        <td class="nowrap"><%= h.fmtNice(t.first_date) %></td>
+        <td class="nowrap <%= t.status !== 'completed' && t.due_date < h.today ? 'danger-text' : '' %>"><%= h.fmtNice(t.due_date) %></td>
+        <td class="center"><%= t.total_revisions ? t.total_revisions + '×' : '—' %></td>
+        <td><span class="badge badge-<%= h.statusClass(t.status) %>"><%= h.statusLabel(t.status) %></span></td>
+        <td class="row-actions">
+          <% if (t.status !== 'completed') { %>
+            <form method="post" action="/delegations/<%= t.id %>/complete">
+              <button class="btn btn-sm btn-success" type="submit">✓ Done</button>
+            </form>
+            <details class="push">
+              <summary class="btn btn-sm">Move</summary>
+              <form method="post" action="/delegations/<%= t.id %>/revise" class="push-form">
+                <input type="date" name="new_date" required>
+                <button class="btn btn-sm btn-primary" type="submit">Save</button>
+              </form>
+            </details>
+          <% } else { %>
+            <form method="post" action="/delegations/<%= t.id %>/reopen">
+              <button class="btn btn-sm" type="submit">Reopen</button>
+            </form>
+          <% } %>
+          <% if (user.role === 'owner') { %>
+            <form method="post" action="/delegations/<%= t.id %>/delete">
+              <button class="btn btn-sm btn-danger" type="submit" data-confirm="Delete this task permanently?">✕</button>
+            </form>
+          <% } %>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<% if (pages > 1) { %>
+<div class="pager">
+  <% const qs = f => { const p = new URLSearchParams(); if (filters.doer_id) p.set('doer_id', filters.doer_id); if (filters.status) p.set('status', filters.status); if (filters.q) p.set('q', filters.q); p.set('page', f); return '?' + p.toString(); } %>
+  <% if (page > 1) { %><a class="btn" href="/delegations<%= qs(page - 1) %>">← Prev</a><% } %>
+  <span class="muted">Page <%= page %> of <%= pages %> (<%= total %> tasks)</span>
+  <% if (page < pages) { %><a class="btn" href="/delegations<%= qs(page + 1) %>">Next →</a><% } %>
+</div>
+<% } %>
+<% } %>
+
+<%- include('../partials/bottom') %>

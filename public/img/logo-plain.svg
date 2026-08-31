@@ -1,0 +1,7 @@
+<!-- Mark without the tile: for light backgrounds, documents, letterheads. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="WorkPulse">
+  <title>WorkPulse</title>
+  <path d="M10 25l6.5 19 6.5-13 6.5 19 7-29 5.5 13h5"
+        fill="none" stroke="#2456d6" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="52" cy="34" r="4" fill="#1b7f3b"/>
+</svg>

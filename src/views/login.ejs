@@ -1,0 +1,24 @@
+<%- include('partials/top', { title }) %>
+
+<div class="login-wrap">
+  <div class="card login-card">
+    <div class="login-brand">
+      <img class="login-mark" src="/img/logo.svg" width="62" height="62" alt="">
+      <h1 class="login-title"><%- brandHtml %></h1>
+      <% if (tagline) { %><p class="login-tagline"><%= tagline %></p><% } %>
+    </div>
+    <form method="post" action="/login" class="stack">
+      <label class="field">
+        <span>Phone number or email</span>
+        <input type="text" name="identifier" autocomplete="username" inputmode="email" required autofocus>
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <button class="btn btn-primary btn-big btn-block" type="submit">Log in</button>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/bottom') %>

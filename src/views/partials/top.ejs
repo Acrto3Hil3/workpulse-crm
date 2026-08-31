@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2456d6">
+<title><%= title %> · <%= appName %></title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="/img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/">
+    <img class="brand-mark" src="/img/logo.svg" width="28" height="28" alt="">
+    <span class="brand-name"><%- brandHtml %></span>
+  </a>
+  <% if (user) { %>
+  <div class="topbar-right">
+    <span class="who"><%= user.name %></span>
+    <form method="post" action="/logout"><button class="btn btn-ghost btn-sm" type="submit">Log out</button></form>
+  </div>
+  <% } %>
+</header>
+<% if (user) { %>
+<nav class="mainnav" aria-label="Main">
+  <% if (user.role === 'doer') { %>
+    <a href="/" class="<%= path === '/' ? 'on' : '' %>"><span class="ic">🏠</span><span>My tasks</span></a>
+    <a href="/my/scores" class="<%= path === '/my/scores' ? 'on' : '' %>"><span class="ic">📊</span><span>My scores</span></a>
+  <% } else { %>
+    <a href="/" class="<%= path === '/' ? 'on' : '' %>"><span class="ic">🏠</span><span>Home</span></a>
+    <a href="/delegations" class="<%= path.startsWith('/delegations') ? 'on' : '' %>"><span class="ic">📋</span><span>Tasks</span></a>
+    <a href="/recurring" class="<%= path.startsWith('/recurring') ? 'on' : '' %>"><span class="ic">🔁</span><span>Routine</span></a>
+    <a href="/scores" class="<%= path.startsWith('/scores') ? 'on' : '' %>"><span class="ic">📊</span><span>Scores</span></a>
+    <a href="/doers" class="<%= path.startsWith('/doers') ? 'on' : '' %>"><span class="ic">👥</span><span>Team</span></a>
+  <% } %>
+</nav>
+<% } %>
+<% if (flash) { %>
+<div class="flash flash-<%= flash.type %>" role="status"><%= flash.msg %></div>
+<% } %>
+<main class="container">
