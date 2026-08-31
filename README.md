@@ -29,8 +29,22 @@ npm install
 npm start                   # first boot creates all tables + the owner account
 ```
 
-Open http://localhost:3000 and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `.env`.
-Optional: `npm run demo` fills an empty system with sample data to explore.
+Open http://localhost:3000 and log in.
+
+### Default login
+
+On the very first boot — and only while the `users` table is still empty — the app creates one **Owner** account from `.env`. If you haven't changed those lines, the credentials are:
+
+| | |
+|---|---|
+| **Email** | `owner@example.com` |
+| **Password** | `changeme123` |
+
+The Owner role passes every permission check, so this account can do everything: add doers, assign delegations, run FMS/checklists, edit rating bands and settings.
+
+Set `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env` *before* the first `npm start` to create the owner with your own credentials instead. **On a real deployment, never leave the default password in place** — the app prints a warning on boot if you do. The account is only ever seeded once; changing these values later has no effect, so change the password from inside the app.
+
+Optional: `npm run demo` fills an empty system with sample data — 4 doers and a manager, who **log in with their phone number** (`9800000001`…`9800000005`) and password `1234`. Demo data only; don't seed it on a production instance.
 
 With an online database (next section) this is all you need on any machine — no local MySQL/Postgres install.
 
